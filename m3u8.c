@@ -22,7 +22,7 @@ target_duration* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
 #include "libavformat/avformat.h"
 
 
-int64_t get_ts_duration(const char *ts_file_name)
+double get_ts_duration(const char *ts_file_name)
 {
     AVInputFormat *ifmt = av_find_input_format("mpegts");
     if (!ifmt) {
@@ -42,13 +42,13 @@ int64_t get_ts_duration(const char *ts_file_name)
 	return -3;
     }
 
-    int64_t video_stream_duration = 0;
-    int64_t audio_stream_duration = 0;
+    double video_stream_duration = 0.0;
+    double audio_stream_duration = 0.0;
     int i;
     for (i = 0; i < ic->nb_streams; i++) {
         switch (ic->streams[i]->codec->codec_type) {
             case AVMEDIA_TYPE_VIDEO:
-                video_stream_duration = ic->streams[i]->duration;
+                video_stream_duration = (double)ic->streams[i]->duration * ic->streams[i]->time_base.num / ic->streams[i]->time_base.den;
                 break;
             case AVMEDIA_TYPE_AUDIO:
                 audio_stream_duration = ic->streams[i]->duration;
@@ -111,12 +111,12 @@ int main(int argc, char **argv)
     while(1){
         snprintf(ts_file_name, sizeof(ts_file_name), "%s%u.ts", prefix, index);
         
-        int duration = get_ts_duration(ts_file_name); 
+        double duration = get_ts_duration(ts_file_name); 
         if (duration < 0){
             break;
         }
 
-        snprintf(write_buf, sizeof(write_buf), "#EXTINF:%d,\n%s%s\n", duration, http_prefix, ts_file_name);
+        snprintf(write_buf, sizeof(write_buf), "#EXTINF:%u,\n%s%s\n", (unsigned int)round(duration), http_prefix, ts_file_name);
         if (fwrite(write_buf, strlen(write_buf), 1, index_fp) != 1) {
 	    fprintf(stderr, "Could not write to m3u8 index file, will not continue writing to index file\n");
 	    break;
