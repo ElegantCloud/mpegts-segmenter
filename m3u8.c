@@ -65,27 +65,31 @@ double get_ts_duration(const char *ts_file_name)
 
 int main(int argc, char **argv)
 {
+    const char *dir = NULL;
     const char *prefix = NULL;
     unsigned int index = 0;
     const char *index_file_name = NULL;    
     unsigned int target_duration = 0;
     const char *http_prefix = NULL;
+    char ts_file_full_name[256];
     char ts_file_name[128];
 
     FILE *index_fp;
     char write_buf[512];
 
-    if (argc < 6 ) {
-        fprintf(stderr, "Usage: %s <MPEG-TS file prefix> <start index> <output m3u8 index file> <target duration> <http prefix>\n", argv[0]);
+    if (argc < 7 ) {
+        fprintf(stderr, "Usage: %s <MPEG-TS dir> <MPEG-TS file prefix> <start index> <output m3u8 index file> <target duration> <http prefix>\n", argv[0]);
         exit(1);
     }
     
-    prefix = argv[1];
-    index = atoi(argv[2]);
-    index_file_name = argv[3];
-    target_duration = atoi(argv[4]);
-    http_prefix = argv[5];
+    dir = argv[1];
+    prefix = argv[2];
+    index = atoi(argv[3]);
+    index_file_name = argv[4];
+    target_duration = atoi(argv[5]);
+    http_prefix = argv[6];
 
+    fprintf(stdout, "MPEG-TS dir: %s\n", dir);
     fprintf(stdout, "MPEG-TS prefix: %s\n", prefix);
     fprintf(stdout, "start index: %d\n", index);
     fprintf(stdout, "index file name: %s\n", index_file_name);
@@ -110,8 +114,9 @@ int main(int argc, char **argv)
 
     while(1){
         snprintf(ts_file_name, sizeof(ts_file_name), "%s%u.ts", prefix, index);
+        snprintf(ts_file_full_name, sizeof(ts_file_full_name), "%s%s", dir, ts_file_name);
         
-        double duration = get_ts_duration(ts_file_name); 
+        double duration = get_ts_duration(ts_file_full_name); 
         if (duration < 0){
             break;
         }
