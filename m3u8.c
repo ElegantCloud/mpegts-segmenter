@@ -1,19 +1,4 @@
-/*
- * Copyright (c) 2009 Chase Douglas
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License version 2
- * as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
-target_duration* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -22,7 +7,7 @@ target_duration* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
 #include "libavformat/avformat.h"
 
 
-double get_ts_duration(const char *segment_file_name)
+double get_media_duration(const char *segment_file_name)
 {
     /*
     AVInputFormat *ifmt = av_find_input_format("mpegts");
@@ -36,7 +21,7 @@ double get_ts_duration(const char *segment_file_name)
     AVFormatContext *ic = NULL;
     int ret = avformat_open_input(&ic, segment_file_name, ifmt, NULL);
     if (ret != 0) {
-        fprintf(stderr, "Could not open input file %s, make sure it is an mpegts file: %d\n", segment_file_name, ret);
+        fprintf(stderr, "Could not open input file %s, make sure it is an valid file: %d\n", segment_file_name, ret);
         return -2;
     }
 
@@ -76,7 +61,6 @@ int main(int argc, char **argv)
 {
     const char *dir = NULL;
     const char *pattern = NULL;
-    const char *file_type = NULL;
     unsigned int index = 0;
     const char *index_file_name = NULL;    
     unsigned int target_duration = 0;
@@ -99,8 +83,8 @@ int main(int argc, char **argv)
     target_duration = atoi(argv[5]);
     http_prefix = argv[6];
 
-    fprintf(stdout, "MPEG-TS dir: %s\n", dir);
-    fprintf(stdout, "MPEG-TS pattern: %s\n", pattern);
+    fprintf(stdout, "input dir: %s\n", dir);
+    fprintf(stdout, "media file pattern: %s\n", pattern);
     fprintf(stdout, "start index: %d\n", index);
     fprintf(stdout, "index file name: %s\n", index_file_name);
     fprintf(stdout, "target duration: %d\n", target_duration);
@@ -125,7 +109,7 @@ int main(int argc, char **argv)
         snprintf(segment_file_name, sizeof(segment_file_name), pattern, index);
         snprintf(segment_file_path, sizeof(segment_file_path), "%s%s", dir, segment_file_name);
         
-        double duration = get_ts_duration(segment_file_path); 
+        double duration = get_media_duration(segment_file_path); 
         if (duration < 0){
             break;
         }
